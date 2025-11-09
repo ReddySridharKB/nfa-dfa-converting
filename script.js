@@ -26,6 +26,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     enabled: true,
                     type: 'arrow'
                 }
+            },
+            font: {
+                size: 16,
+                align: 'middle',
+                vadjust: 0,
+                background: 'white',
+                color: 'black',
+                strokeWidth: 1,
+                strokeColor: 'black'
             }
         }
     };
@@ -36,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners
     document.getElementById('convert-btn').addEventListener('click', convertToDFA);
     document.getElementById('next-step-btn').addEventListener('click', nextStep);
+    document.getElementById('prev-step-btn').addEventListener('click', prevStep);
     document.getElementById('reset-btn').addEventListener('click', resetPlayback);
     document.getElementById('examples').addEventListener('change', loadExample);
 });
@@ -205,17 +215,25 @@ function visualizeNFA(transitions, states) {
         borderWidth: finalStates.includes(state) ? 3 : 1
     }));
     nfaData.edges = [];
+    const edgeMap = {};
     for (const state in transitions) {
         for (const symbol in transitions[state]) {
             for (const next of transitions[state][symbol]) {
-                nfaData.edges.push({
-                    from: state,
-                    to: next,
-                    label: symbol === 'e' ? 'ε' : symbol,
-                    arrows: 'to'
-                });
+                const key = `${state}-${next}`;
+                if (!edgeMap[key]) edgeMap[key] = [];
+                edgeMap[key].push(symbol === 'e' ? 'ε' : symbol);
             }
         }
+    }
+    for (const key in edgeMap) {
+        const [from, to] = key.split('-');
+        const labels = edgeMap[key].sort().join(',');
+        nfaData.edges.push({
+            from: from,
+            to: to,
+            label: labels,
+            arrows: 'to'
+        });
     }
     nfaNetwork.setData(nfaData);
 }
@@ -232,12 +250,21 @@ function nextStep() {
             shape: 'circle',
             borderWidth: step.subset.split(',').some(s => finalStates.includes(s)) ? 3 : 1
         });
-        // Add edges for this step
+        // Add edges for this step, combining labels on same edges
+        const edgeMap = {};
         for (const symbol in step.transitions) {
+            const next = step.transitions[symbol];
+            const key = `${step.dfaState}-${next}`;
+            if (!edgeMap[key]) edgeMap[key] = [];
+            edgeMap[key].push(symbol);
+        }
+        for (const key in edgeMap) {
+            const [from, to] = key.split('-');
+            const labels = edgeMap[key].sort().join(',');
             dfaData.edges.push({
-                from: step.dfaState,
-                to: step.transitions[symbol],
-                label: symbol,
+                from: from,
+                to: to,
+                label: labels,
                 arrows: 'to'
             });
         }
@@ -247,6 +274,44 @@ function nextStep() {
         if (currentStep >= dfaSteps.length) {
             document.getElementById('next-step-btn').disabled = true;
         }
+        document.getElementById('prev-step-btn').disabled = currentStep === 0;
+    }
+}
+
+// Previous step in DFA visualization
+function prevStep() {
+    if (currentStep > 0) {
+        currentStep--;
+        // Remove the last added node and its edges
+        dfaData.nodes.pop();
+        // Rebuild edges up to current step
+        dfaData.edges = [];
+        for (let i = 0; i < currentStep; i++) {
+            const step = dfaSteps[i];
+            const edgeMap = {};
+            for (const symbol in step.transitions) {
+                const next = step.transitions[symbol];
+                const key = `${step.dfaState}-${next}`;
+                if (!edgeMap[key]) edgeMap[key] = [];
+                edgeMap[key].push(symbol);
+            }
+            for (const key in edgeMap) {
+                const [from, to] = key.split('-');
+                const labels = edgeMap[key].sort().join(',');
+                dfaData.edges.push({
+                    from: from,
+                    to: to,
+                    label: labels,
+                    arrows: 'to'
+                });
+            }
+        }
+        dfaNetwork.setData(dfaData);
+        updateStepCounter();
+        if (currentStep < dfaSteps.length) {
+            document.getElementById('next-step-btn').disabled = false;
+        }
+        document.getElementById('prev-step-btn').disabled = currentStep === 0;
     }
 }
 
@@ -257,6 +322,7 @@ function resetPlayback() {
     dfaNetwork.setData(dfaData);
     currentStep = 0;
     document.getElementById('next-step-btn').disabled = false;
+    document.getElementById('prev-step-btn').disabled = true;
     updateStepCounter();
 }
 
@@ -292,15 +358,24 @@ function visualizeCompleteDFA(transitions, dfaStates, stateMap) {
             borderWidth: subset.split(',').some(s => finalStates.includes(s)) ? 3 : 1
         });
     }
+    const edgeMap = {};
     for (const state in transitions) {
         for (const symbol in transitions[state]) {
-            completeDfaData.edges.push({
-                from: state,
-                to: transitions[state][symbol],
-                label: symbol,
-                arrows: 'to'
-            });
+            const next = transitions[state][symbol];
+            const key = `${state}-${next}`;
+            if (!edgeMap[key]) edgeMap[key] = [];
+            edgeMap[key].push(symbol);
         }
+    }
+    for (const key in edgeMap) {
+        const [from, to] = key.split('-');
+        const labels = edgeMap[key].sort().join(',');
+        completeDfaData.edges.push({
+            from: from,
+            to: to,
+            label: labels,
+            arrows: 'to'
+        });
     }
     completeDfaNetwork.setData(completeDfaData);
 }
