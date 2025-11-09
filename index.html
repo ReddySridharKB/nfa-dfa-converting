@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFA to DFA Converter</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>NFA to DFA Converter</h1>
+        <div class="card">
+            <div class="input-section">
+                <label for="examples">Select Example:</label>
+                <select id="examples">
+                    <option value="">-- Choose an example --</option>
+                    <option value="no-epsilon">NFA without epsilon transitions</option>
+                    <option value="with-epsilon">NFA with epsilon transitions</option>
+                </select>
+                <label for="states">States (comma-separated):</label>
+                <input type="text" id="states" placeholder="e.g., q0,q1,q2">
+                <label for="alphabet">Alphabet (comma-separated):</label>
+                <input type="text" id="alphabet" placeholder="e.g., a,b">
+                <label for="transitions">Transitions (one per line, e.g., q0,a=q0,q1):</label>
+                <textarea id="transitions" rows="5" placeholder="q0,a=q0,q1&#10;q0,b=q0&#10;q1,b=q2"></textarea>
+                <label for="start-state">Start State:</label>
+                <input type="text" id="start-state" placeholder="e.g., q0">
+                <label for="final-states">Final States (comma-separated):</label>
+                <input type="text" id="final-states" placeholder="e.g., q2">
+                <button id="convert-btn">Convert to DFA</button>
+            </div>
+            <div class="visualization-section">
+                <div class="graph-container">
+                    <h2>NFA Visualization</h2>
+                    <div id="nfa-graph"></div>
+                </div>
+                <div class="graph-container">
+                    <h2>Complete DFA Visualization</h2>
+                    <div id="complete-dfa-graph"></div>
+                </div>
+                <div class="graph-container">
+                    <h2>Step-by-Step DFA Visualization</h2>
+                    <div id="dfa-graph"></div>
+                    <div class="playback-controls">
+                        <button id="next-step-btn" disabled>Next Step</button>
+                        <button id="reset-btn" disabled>Reset</button>
+                        <span id="step-counter">Step 0 of 0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="tables-section">
+                <div class="table-container">
+                    <h2>NFA Transition Table</h2>
+                    <table id="nfa-table">
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Symbol</th>
+                                <th>Next States</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="table-container">
+                    <h2>DFA Transition Table</h2>
+                    <table id="dfa-table">
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Symbol</th>
+                                <th>Next State</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
