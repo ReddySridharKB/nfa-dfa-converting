@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const options = {
         physics: false,
         edges: {
-            smooth: false,
+            smooth: true,
             arrows: {
                 to: {
                     enabled: true,
@@ -232,7 +232,8 @@ function visualizeNFA(transitions, states) {
             from: from,
             to: to,
             label: labels,
-            arrows: 'to'
+            arrows: 'to',
+            smooth: from < to ? false : { type: 'curvedCCW', roundness: 0.8 }
         });
     }
     nfaNetwork.setData(nfaData);
@@ -265,7 +266,8 @@ function nextStep() {
                 from: from,
                 to: to,
                 label: labels,
-                arrows: 'to'
+                arrows: 'to',
+                smooth: from < to ? false : { type: 'curvedCCW', roundness: 0.8 }
             });
         }
         dfaNetwork.setData(dfaData);
@@ -295,16 +297,17 @@ function prevStep() {
                 if (!edgeMap[key]) edgeMap[key] = [];
                 edgeMap[key].push(symbol);
             }
-            for (const key in edgeMap) {
-                const [from, to] = key.split('-');
-                const labels = edgeMap[key].sort().join(',');
-                dfaData.edges.push({
-                    from: from,
-                    to: to,
-                    label: labels,
-                    arrows: 'to'
-                });
-            }
+        for (const key in edgeMap) {
+            const [from, to] = key.split('-');
+            const labels = edgeMap[key].sort().join(',');
+            dfaData.edges.push({
+                from: from,
+                to: to,
+                label: labels,
+                arrows: 'to',
+                smooth: from < to ? false : { type: 'curvedCCW', roundness: 0.8 }
+            });
+        }
         }
         dfaNetwork.setData(dfaData);
         updateStepCounter();
@@ -367,16 +370,17 @@ function visualizeCompleteDFA(transitions, dfaStates, stateMap) {
             edgeMap[key].push(symbol);
         }
     }
-    for (const key in edgeMap) {
-        const [from, to] = key.split('-');
-        const labels = edgeMap[key].sort().join(',');
-        completeDfaData.edges.push({
-            from: from,
-            to: to,
-            label: labels,
-            arrows: 'to'
-        });
-    }
+        for (const key in edgeMap) {
+            const [from, to] = key.split('-');
+            const labels = edgeMap[key].sort().join(',');
+            completeDfaData.edges.push({
+                from: from,
+                to: to,
+                label: labels,
+                arrows: 'to',
+                smooth: from < to ? false : { type: 'curvedCCW', roundness: 0.8 }
+            });
+        }
     completeDfaNetwork.setData(completeDfaData);
 }
 
